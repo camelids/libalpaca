@@ -1,0 +1,118 @@
+
+                                   ALPaCA
+
+                             Giovanni Cherubin
+                                Jamie Hayes
+                                Marc Juarez
+                                Noah Vesely
+
+ALPaCA is an application-level server-side Website Fingerprinting (WF) defense.
+This document describes ALPaCA, and speficies the API of libalpaca and how it
+can be used by web server modules.
+
+0. Preliminaries
+
+      The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+      "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this
+      document are to be interpreted as described in RFC 2119.
+
+1. Overview
+   libalpaca is primarily thought to called from a web server module (e.g.,
+   `nginx`, `Apache`). It MAY be used from a different web framework (e.g.,
+   Python `flask`), although this may require custom adaptations.
+   
+   We will call "Module" the software handling web requests and calling
+   libalpaca on them. In the case of nginx, ALPaCA can be implemented as a body
+   filter module.
+
+1.1 API Overview
+
+   libalpaca provides the following functions:
+
+     -  char *morph_page(char *html) : Takes as input an HTML page, parses its
+        objects, samples the padding to apply to each object (and potential new
+        objects to create) and adds this information to the objects' URLs
+        (e.g., "/img.png" -> "/img.png?alpaca-padding=300"), and returns the
+        morphed and adequately padded HTML page.
+     -  unsigned char *pad_object(unsigned char *raw,
+                                  unsigned int file_type,
+                                  unsigned int target_size):
+        Takes as input an object as binary data, its type (see following
+        function) and its target size in bytes, and returns the padded object.
+     -  unsigned int parse_object_type(char *request): Takes as input a request
+        string (e.g., "/img.png?uid=...&...") and returns the requested
+        object's type according to libalpaca's conventions.
+
+1.2 Inside the Module
+
+   We describe how the Module should operate upon receiving client requests.
+   In the case of nginx this function can be implemented in
+   `ngx_http_catch_body_filter()` [0].
+
+   Pseudo code:
+
+      Input: (unsigned char *raw_object, char *request_path)
+
+      object_type = parse_object_type(request_path)
+
+      if object_type == 1       // This means the object type is HTML
+            new_object = morph_page(raw_object)
+      else
+            target_size = parse_target_size(request_path)
+            // NOTE: need to keep an alpaca object somewhere on server
+            new_object = pad_object(raw_object, object_type, target_size)
+
+      Output: new_object
+
+   The function receives as input a raw binary representation of the object,
+   and the request string.
+   It first gets the object type, which is later used internally by ALPaCA.
+   If the object type is HTML (object_type == 1), then morph_page() is called
+   to decide how the page will be morphed for the particular client that
+   requested it, and which returns the respective HTML object.
+   Otherwise, pad_object() is called; note that in this case, if the
+   object_type is 0 (i.e., ALPaCA object type), then a new object of random
+   data is returned.
+
+2. libalpaca
+
+   This section describes the internals of the library.
+   
+2.1 Preliminaries
+
+    Object types are associated with an unsigned int.
+
+       ALPACA_T = 0
+       HTML_T = 1
+       CSS_T = 2
+       IMG_T = 3
+       UNKNOWN_T = 4
+    
+    Probability distributions and configuration files will be stored in:
+        
+       ALPACA_PATH = ?
+
+    For internal signalling within the library, the server should store an
+    empty file at the following location:
+      
+       ALPACA_RND_PATH = /alpaca.rnd
+
+3. Deployment Considerations
+
+3.1 Content
+
+   All content should be self-hosted.
+
+3.2 JavaScript
+
+   JavaScript SHOULD be disabled.
+
+3.3 iframes
+
+3.4 TTL of objects
+
+   Objects MUST NOT be cached by the browser (check).
+
+4. Security Concerns
+
+[0] https://www.nginx.com/resources/wiki/extending/examples/body_filter
