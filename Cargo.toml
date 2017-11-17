@@ -1,0 +1,12 @@
+[package]
+name = "alpaca"
+version = "0.1.0"
+authors = ["Giovanni Cherubin <g.chers@gmail.com>"]
+
+[lib]
+name = "alpaca"
+crate-type = ["dylib"]
+
+[dependencies]
+rand = "0.3"
+pcg_rand = "0.7.0"
