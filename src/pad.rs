@@ -15,32 +15,38 @@ use types::*;
 /// * `raw` - Object to pad.
 /// * `extension` - The object's extension (e.g., "png").
 /// * `target_size` - The target size.
-#[no_mangle]
-pub extern fn pad_object(raw: &[u8], object_type: &str, target_size: usize) -> *const u8 {
+pub fn pad_object(raw: &[u8], object_type: ObjectType, target_size: usize) -> Vec<u8> {
 
-    let mut object = raw.to_vec();
+    let mut object;
+
+    if object_type != ALPACA_T {
+        object = raw.to_vec();
+        object.reserve_exact(target_size - raw.len());
+    }
+    else {
+        object = Vec::with_capacity(target_size); // New "padding object"
+    }
 
     match object_type {
-        HTML_T => pad_html(&mut object, target_size),
-        CSS_T => pad_css(&mut object, target_size),
-        _ => pad_binary(&mut object, target_size),
-    };
-    
-    object.as_ptr()
+        HTML_T => pad_html(object, target_size),
+        CSS_T => pad_css(object, target_size),
+        _ => pad_binary(object, target_size),
+    }
 }
 
-fn pad_html(raw: &mut Vec<u8>, target_size: usize) {
+fn pad_html(raw: Vec<u8>, target_size: usize) -> Vec<u8> {
     // XXX: better to return new vec in this case?
+    // XXX: maybe just append to the end
     unimplemented!();
 }
 
-fn pad_css(raw: &mut Vec<u8>, target_size: usize) {
+fn pad_css(raw: Vec<u8>, target_size: usize) -> Vec<u8>{
     //Pcg32::new_unseeded()
     //      .gen_ascii_chars();
     unimplemented!();
 }
 
-fn pad_binary(raw: &mut Vec<u8>, target_size: usize) {
+fn pad_binary(mut raw: Vec<u8>, target_size: usize) -> Vec<u8> {
 
     let pad_len = target_size - raw.len();
 
@@ -49,4 +55,5 @@ fn pad_binary(raw: &mut Vec<u8>, target_size: usize) {
     raw.extend(Pcg32::new_unseeded()
                      .gen_iter::<u8>()
                      .take(pad_len));
+    raw
 }
