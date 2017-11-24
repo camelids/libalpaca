@@ -1,10 +1,13 @@
 
-const ALPACA_T: usize = 0;
-const HTML_T: usize = 1;
-const CSS_T: usize = 2;
-const IMG_T: usize = 3;
-const UNKNOWN_T: usize = 4;
+pub type ObjectType = usize;
 
-pub extern fn parse_object_type(object: &[u8], request: &str) -> usize {
+// Object types
+pub const ALPACA_T: ObjectType = 0;
+pub const HTML_T: ObjectType = 1;
+pub const CSS_T: ObjectType = 2;
+pub const IMG_T: ObjectType = 3;
+pub const UNKNOWN_T: ObjectType = 4;
+
+pub extern fn parse_object_type(object: &[u8], request: &str) -> ObjectType {
     unimplemented!();
 }
