@@ -82,7 +82,6 @@ fn get_binary_padding(pad_len: usize, rng: &mut XorShiftRng) -> Vec<u8> {
 mod tests {
     use super::*;
 
-    use rand::weak_rng;
     use rand::distributions::{IndependentSample, Range};
 
     use std::str;
