@@ -53,10 +53,10 @@ fn get_html_padding(pad_len: usize, rng: &mut XorShiftRng) -> Vec<u8> {
     // and closing syntax.
     let pad_len = pad_len - HTML_COMMENT_START_SIZE - HTML_COMMENT_END_SIZE;
     let mut pad = Vec::from(HTML_COMMENT_START);
-    // [34,127) contains only human-readable ascii characters, no
-    // whitespace, and omits '!' to ensure the CSS comment cannot be ended
-    // early by the random generation of the bytes corresponding to '<!--'.
-    pad.extend(sample(rng, 34..127, pad_len));
+    // [46,127) contains only human-readable ascii characters, no
+    // whitespace, and omits '-' to ensure the HTML comment cannot be ended
+    // early by the random generation of the bytes corresponding to '-->'.
+    pad.extend(sample(rng, 46..127, pad_len));
     pad.extend(Vec::from(HTML_COMMENT_END));
     pad
 }
@@ -91,7 +91,7 @@ mod tests {
     fn test_pad_object_html() {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
-        let raw = sample(&mut rng, 34..127, raw_len);
+        let raw = sample(&mut rng, 46..127, raw_len);
         assert_eq!(raw.len(), raw_len);
         let comment_syntax_size = HTML_COMMENT_START_SIZE
             + HTML_COMMENT_END_SIZE;
@@ -120,7 +120,7 @@ mod tests {
     fn test_pad_method_html() {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
-        let raw = sample(&mut rng, 34..127, raw_len);
+        let raw = sample(&mut rng, 46..127, raw_len);
         let mut object = Object::from(&raw, "html");
         assert_eq!(object.content.len(), raw_len);
         assert!(match object.kind {
