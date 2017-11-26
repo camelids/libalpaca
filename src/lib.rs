@@ -7,5 +7,6 @@
 extern crate rand;
 
 pub mod pad;
-pub mod types;
+pub mod objects;
+pub mod parsing;
 pub mod morphing;

@@ -1,6 +1,6 @@
-use rand::weak_rng;
-
-use types::*;
+use pad::*;
+use objects::*;
+use parsing::{parse_target_size, parse_objects};
 
 
 /// Do ALPaCA's morphing.
@@ -17,16 +17,11 @@ pub extern fn morph_object(object: &[u8], request: &str) -> *const u8 {
     }
     else {
         let target_size = parse_target_size(request);
-        let mut rng = weak_rng();
 
-        object.pad(target_size, &mut rng);
+        object.pad(target_size);
     }
 
     object.as_ptr()
-}
-
-fn parse_target_size(request: &str) -> usize {
-    unimplemented!();
 }
 
 /// Samples a new page's characteristics from a distribution,
@@ -41,9 +36,5 @@ fn parse_target_size(request: &str) -> usize {
 ///
 /// `html` - HTML page.
 fn morph_html(html: &mut Object) {
-    unimplemented!();
-}
-
-fn parse_objects(html: &str) -> Vec<Object> {
     unimplemented!();
 }

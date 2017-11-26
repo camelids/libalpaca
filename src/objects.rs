@@ -1,3 +1,5 @@
+use parsing::parse_object_kind;
+
 #[derive(PartialEq)]
 pub enum ObjectKind {
     Alpaca,
@@ -23,16 +25,6 @@ impl Object {
     pub fn as_ptr(self) -> *const u8 {
         self.content.as_ptr()
     }
-}
-
-/// Parses the object's kind from its raw representation and
-/// the associated request.
-///
-/// XXX: if we realise that `request` is not needed to determine
-/// the object's kind, we can remove it from here and from
-/// `Object::from()`.
-fn parse_object_kind(raw: &[u8], request: &str) -> ObjectKind {
-    unimplemented!();
 }
 
 #[cfg(test)]

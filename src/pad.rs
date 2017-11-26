@@ -1,6 +1,7 @@
-use types::*;
 use rand::{Rng, sample, weak_rng, XorShiftRng};
 use std::iter::Extend;
+
+use objects::*;
 
 static CSS_COMMENT_START: &'static str = "/*";
 const CSS_COMMENT_START_SIZE: usize = 2;
@@ -11,8 +12,17 @@ const HTML_COMMENT_START_SIZE: usize = 4;
 static HTML_COMMENT_END: &'static str = "-->";
 const HTML_COMMENT_END_SIZE: usize = 3;
 
+pub trait Paddable {
+    /// Pads an object up to a given size.
+    ///
+    /// # Arguments
+    ///
+    /// * `target_size` - The target size.
+    fn pad(&mut self, usize);
+}
 
-impl Object {
+
+impl Paddable for Object {
     /// Pads an object up to a given size.
     ///
     /// Padding varies with respect to the object's type.
@@ -22,15 +32,16 @@ impl Object {
     /// # Arguments
     ///
     /// * `target_size` - The target size.
-    pub fn pad(&mut self, target_size: usize, rng: &mut XorShiftRng) {
+    fn pad(&mut self, target_size: usize) {
+        let mut rng = weak_rng();
         // Rust's type system guarantees pad_len will be >=0 because
         // target_size is unsigned. However, Rust panic!s in this case and in
         // the future we should do proper recovery/ error handling.
         let pad_len = target_size - self.content.len();
         let padding = match self.kind {
-            ObjectKind::HTML => get_html_padding(pad_len, rng),
-            ObjectKind::CSS  => get_css_padding(pad_len, rng),
-            _                => get_binary_padding(pad_len, rng),
+            ObjectKind::HTML => get_html_padding(pad_len, &mut rng),
+            ObjectKind::CSS => get_css_padding(pad_len, &mut rng),
+            _ => get_binary_padding(pad_len, &mut rng),
         };
         self.content.extend(padding);
     }
