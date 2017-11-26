@@ -1,13 +1,63 @@
+#[derive(PartialEq)]
+pub enum ObjectKind {
+    Alpaca,
+    HTML,
+    CSS,
+    IMG,
+    Unknown,
+}
 
-pub type ObjectType = usize;
+pub struct Object {
+    pub kind: ObjectKind,
+    pub content: Vec<u8>,
+}
 
-// Object types
-pub const ALPACA_T: ObjectType = 0;
-pub const HTML_T: ObjectType = 1;
-pub const CSS_T: ObjectType = 2;
-pub const IMG_T: ObjectType = 3;
-pub const UNKNOWN_T: ObjectType = 4;
+impl Object {
+    pub fn from(raw: &[u8], request: &str) -> Object {
+        Object {
+            kind: parse_object_kind(raw, request),
+            content: raw.to_vec(),
+        }
+    }
 
-pub extern fn parse_object_type(object: &[u8], request: &str) -> ObjectType {
+    pub fn as_ptr(self) -> *const u8 {
+        self.content.as_ptr()
+    }
+}
+
+/// Parses the object's kind from its raw representation and
+/// the associated request.
+///
+/// XXX: if we realise that `request` is not needed to determine
+/// the object's kind, we can remove it from here and from
+/// `Object::from()`.
+fn parse_object_kind(raw: &[u8], request: &str) -> ObjectKind {
     unimplemented!();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use rand::distributions::{IndependentSample, Range};
+    use rand::{Rng, weak_rng};
+
+    fn test_object_from_and_as_ptr_jpg() {
+        let mut rng = weak_rng();
+        let raw_len = Range::new(0, 50).ind_sample(&mut rng);
+        let raw = rng.gen_iter::<u8>().take(raw_len).collect::<Vec<u8>>();
+        let mut object = Object::from(&raw, "jpg");
+        assert_eq!(object.content.len(), raw_len);
+        assert!(match object.kind {
+            ObjectKind::IMG => true,
+            _               => false,
+        });
+
+        let obj_ptr = object.as_ptr();
+        unsafe {
+            for i in 0..raw_len {
+                assert_eq!(raw[i], *obj_ptr.offset(i as isize));
+            }
+        }
+    }
 }

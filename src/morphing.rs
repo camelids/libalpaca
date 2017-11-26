@@ -1,11 +1,7 @@
-use types::*;
-use pad::pad_object;
+use rand::weak_rng;
 
-struct Object {
-    size: usize,
-    path: &'static str,
-    position: usize,
-}
+use types::*;
+
 
 /// Do ALPaCA's morphing.
 ///
@@ -14,15 +10,19 @@ struct Object {
 /// type of object, it returns the object padded to the specified size.
 #[no_mangle]
 pub extern fn morph_object(object: &[u8], request: &str) -> *const u8 {
-    let object_type = parse_object_type(object, request);
+    let mut object = Object::from(object, request);
 
-    if object_type == HTML_T {
-        morph_html(object)
+    if object.kind == ObjectKind::HTML {
+        morph_html(&mut object);
     }
     else {
         let target_size = parse_target_size(request);
-        pad_object(object, object_type, target_size)
-    }.as_ptr()
+        let mut rng = weak_rng();
+
+        object.pad(target_size, &mut rng);
+    }
+
+    object.as_ptr()
 }
 
 fn parse_target_size(request: &str) -> usize {
@@ -40,7 +40,7 @@ fn parse_target_size(request: &str) -> usize {
 /// # Arguments
 ///
 /// `html` - HTML page.
-fn morph_html(html: &[u8]) -> Vec<u8> {
+fn morph_html(html: &mut Object) {
     unimplemented!();
 }
 
