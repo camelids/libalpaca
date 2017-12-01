@@ -1,3 +1,6 @@
+use parsing::parse_object_kind;
+
+#[derive(PartialEq)]
 pub enum ObjectKind {
     Alpaca,
     HTML,
@@ -12,19 +15,10 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn from(raw: &[u8], content_type: &str) -> Object {
-        let kind = match content_type {
-            // Sample values for early development.
-            "alpaca" => ObjectKind::Alpaca,
-            "html"   => ObjectKind::HTML,
-            "css"    => ObjectKind::CSS,
-            "png"    => ObjectKind::IMG,
-            "jpg"    => ObjectKind::IMG,
-            _        => ObjectKind::Unknown,
-        };
+    pub fn from(raw: &[u8], request: &str) -> Object {
         Object {
-            kind,
-            content: raw.to_vec()
+            kind: parse_object_kind(raw, request),
+            content: raw.to_vec(),
         }
     }
 
@@ -39,7 +33,6 @@ mod tests {
 
     use rand::distributions::{IndependentSample, Range};
     use rand::{Rng, weak_rng};
-
 
     fn test_object_from_and_as_ptr_jpg() {
         let mut rng = weak_rng();
