@@ -12,14 +12,14 @@ use parsing::{parse_target_size, parse_objects};
 pub extern fn morph_object(object: &[u8], request: &str) -> *const u8 {
     let mut object = Object::from(object, request);
 
-    if object.kind == ObjectKind::HTML {
-        morph_html(&mut object);
+    let target_size = if object.kind == ObjectKind::HTML {
+        morph_html(&mut object)
     }
     else {
-        let target_size = parse_target_size(request);
+        parse_target_size(request)
+    };
 
-        object.pad(target_size);
-    }
+    object.pad(target_size);
 
     object.as_ptr()
 }
@@ -35,6 +35,6 @@ pub extern fn morph_object(object: &[u8], request: &str) -> *const u8 {
 /// # Arguments
 ///
 /// `html` - HTML page.
-fn morph_html(html: &mut Object) {
+fn morph_html(html: &mut Object) -> usize {
     unimplemented!();
 }
