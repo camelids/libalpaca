@@ -10,3 +10,4 @@ pub mod pad;
 pub mod objects;
 pub mod parsing;
 pub mod morphing;
+pub mod distribution;

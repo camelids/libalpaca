@@ -1,3 +1,5 @@
+use rand::os::OsRng;
+
 use pad::*;
 use objects::*;
 use parsing::{parse_target_size, parse_objects};
