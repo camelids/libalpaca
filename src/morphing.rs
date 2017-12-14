@@ -48,11 +48,11 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
     // Minimum characteristics.
     let min_count = objects.len();
     let html_min_size = html.content.len();
-    let mut obj_min_size = objects.iter()
-                                  .map(|o| o.content.len())
-                                  .min()
-                                  // TODO: what should we do in this case?
-                                  .expect("No objects in this page");
+    let obj_min_size = objects.iter()
+                              .map(|o| o.content.len())
+                              .min()
+                              // TODO: what should we do in this case?
+                              .expect("No objects in this page");
 
     let mut rng = OsRng::new()
                         .expect("Failed to initialize system RNG");
@@ -97,15 +97,15 @@ fn morph_from_distribution<R: Rng>(rng: &mut R, objects: &mut Vec<Object>,
     for s in target_sizes {
         if (i < n) && (s >= objects[i].content.len()) {
             // Pad i-th object to size s.
-            objects[i].target_size = s;
+            objects[i].target_size = Some(s);
             i += 1;
         }
         else {
             // Create new padding object.
             let o = Object { kind: ObjectKind::Alpaca,
                              content: Vec::new(),
-                             position: 0,
-                             target_size: s};
+                             position: None,
+                             target_size: Some(s)};
             objects.push(o);
         }
     }
@@ -123,4 +123,48 @@ fn morph_from_distribution<R: Rng>(rng: &mut R, objects: &mut Vec<Object>,
 
 fn insert_objects_refs(html: &mut Object, objects: &Vec<Object>) -> Result<(), ()> {
     unimplemented!();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rand::{Rng, StdRng, SeedableRng};
+
+    fn generate_objects() -> Vec<Object> {
+        let object_sizes: Vec<usize> = vec![400, 2000, 1000, 100];
+
+        object_sizes.iter()
+                    .map(|s| Object { kind: ObjectKind::Unknown,
+                                      content: vec![0u8; *s],
+                                      position: None,
+                                      target_size: None })
+                    .collect()
+    }
+
+    fn init_seeded_rng() -> StdRng {
+        let s: Vec<usize> = vec![0, 0];
+
+        SeedableRng::from_seed(&s[..])
+    }
+
+    #[test]
+    fn test_morph_objects_from_distribution() {
+
+        let mut objects = generate_objects();
+        let mut rng = init_seeded_rng();
+
+        let min_count = objects.len();
+        let obj_min_size = objects.iter()
+                                  .map(|o| o.content.len())
+                                  .min()
+                                  .expect("No objects in this page");
+
+        morph_from_distribution(&mut rng, &mut objects, min_count, obj_min_size);
+
+        let expected_sizes = vec![589, 2273, 5395, 8171, 1128, 1664, 11858];
+        let new_sizes = objects.iter()
+                               .map(|o| o.target_size.expect("Need Some"))
+                               .collect::<Vec<_>>();
+        assert!(new_sizes == expected_sizes);
+    }
 }
