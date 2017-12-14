@@ -10,13 +10,13 @@ struct DistParams {
 }
 
 // Hardcoded parameters for log-normal distributions.
-const OBJECT_COUNT_DIST: DistParams = DistParams { mean: 1.0,
-                                                   std_dev: 1.0,
+const OBJECT_COUNT_DIST: DistParams = DistParams { mean: 0.4,
+                                                   std_dev: 2.0,
                                                  };
-const OBJECT_SIZE_DIST: DistParams = DistParams { mean: 1.0,
+const OBJECT_SIZE_DIST: DistParams = DistParams { mean: 8.8,
                                                   std_dev: 1.0,
                                                 };
-const HTML_SIZE_DIST: DistParams = DistParams { mean: 1.0,
+const HTML_SIZE_DIST: DistParams = DistParams { mean: 8.8,
                                                 std_dev: 1.0,
                                               };
 
