@@ -12,6 +12,8 @@ pub enum ObjectKind {
 pub struct Object {
     pub kind: ObjectKind,
     pub content: Vec<u8>,
+    pub position: Option<usize>,
+    pub target_size: Option<usize>,
 }
 
 impl Object {
@@ -19,6 +21,8 @@ impl Object {
         Object {
             kind: parse_object_kind(raw, request),
             content: raw.to_vec(),
+            position: None,
+            target_size: None,
         }
     }
 

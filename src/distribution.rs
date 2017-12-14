@@ -10,19 +10,19 @@ struct DistParams {
 }
 
 // Hardcoded parameters for log-normal distributions.
-const OBJECT_COUNT_DIST: DistParams = DistParams { mean: 1.0,
-                                                   std_dev: 1.0,
+const OBJECT_COUNT_DIST: DistParams = DistParams { mean: 0.4,
+                                                   std_dev: 2.0,
                                                  };
-const OBJECT_SIZE_DIST: DistParams = DistParams { mean: 1.0,
+const OBJECT_SIZE_DIST: DistParams = DistParams { mean: 8.8,
                                                   std_dev: 1.0,
                                                 };
-const HTML_SIZE_DIST: DistParams = DistParams { mean: 1.0,
+const HTML_SIZE_DIST: DistParams = DistParams { mean: 8.8,
                                                 std_dev: 1.0,
                                               };
 
 // Number of tries per sample. If no sampled number satisfies a specified
 // threshold after `SAMPLE_LIMIT` tries the sampling function returns Err.
-const SAMPLE_LIMIT: i8 = 100;
+const SAMPLE_LIMIT: u8 = 30;
 
 /// Samples an `usize` number according to the log-normal distribution
 /// with the specified parameters.
