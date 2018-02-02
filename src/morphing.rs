@@ -47,7 +47,6 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
                                 o1.content.len().cmp(&o2.content.len()));
     // Minimum characteristics.
     let min_count = objects.len();
-    let html_min_size = html.content.len();
 
     let mut rng = OsRng::new()
                         .expect("Failed to initialize system RNG");
@@ -69,6 +68,7 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
     insert_objects_refs(html, &objects);
 
     // Return the target HTML page size.
+    let html_min_size = html.content.len();
     sample_html_size(&mut rng, html_min_size)
 }
 
