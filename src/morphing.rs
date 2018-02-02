@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::{Rng, sample, weak_rng, XorShiftRng};
 use rand::os::OsRng;
 
 use pad::*;
@@ -48,8 +48,7 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
     // Minimum characteristics.
     let min_count = objects.len();
 
-    let mut rng = OsRng::new()
-                        .expect("Failed to initialize system RNG");
+    let mut rng = weak_rng();
 
     // Try morphing for PAGE_SAMPLE_LIMIT times.
     let mut success = false;
@@ -136,10 +135,10 @@ mod tests {
                     .collect()
     }
 
-    fn init_seeded_rng() -> StdRng {
+    fn init_seeded_rng() -> XorShiftRng {
         let s: Vec<usize> = vec![0, 0];
 
-        SeedableRng::from_seed(&s[..])
+        XorShiftRng::from_seed(&s[..])
     }
 
     #[test]
