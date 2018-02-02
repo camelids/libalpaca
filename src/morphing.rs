@@ -65,7 +65,7 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
         return Err(());
     }
 
-    insert_objects_refs(html, &objects);
+    insert_objects_refs(html, &objects)?;
 
     // Return the target HTML page size.
     let html_min_size = html.content.len();
