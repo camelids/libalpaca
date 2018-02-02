@@ -22,7 +22,7 @@ const HTML_SIZE_DIST: DistParams = DistParams { mean: 8.8,
 
 // Number of tries per sample. If no sampled number satisfies a specified
 // threshold after `SAMPLE_LIMIT` tries the sampling function returns Err.
-const SAMPLE_LIMIT: u8 = 30;
+const SAMPLE_LIMIT: usize = 30;
 
 /// Samples an `usize` number according to the log-normal distribution
 /// with the specified parameters.
