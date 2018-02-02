@@ -48,11 +48,6 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
     // Minimum characteristics.
     let min_count = objects.len();
     let html_min_size = html.content.len();
-    let obj_min_size = objects.iter()
-                              .map(|o| o.content.len())
-                              .min()
-                              // TODO: what should we do in this case?
-                              .expect("No objects in this page");
 
     let mut rng = OsRng::new()
                         .expect("Failed to initialize system RNG");
@@ -61,7 +56,7 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
     let mut success = false;
     for _ in 0..PAGE_SAMPLE_LIMIT {
         if let Ok(_) = morph_from_distribution(&mut rng, &mut objects,
-                                               min_count, obj_min_size) {
+                                               min_count) {
             success = true;
             break;
         }
@@ -78,12 +73,12 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
 }
 
 fn morph_from_distribution<R: Rng>(rng: &mut R, objects: &mut Vec<Object>,
-        min_count: usize, obj_min_size: usize) -> Result<(), ()> {
+        min_count: usize) -> Result<(), ()> {
 
     // Sample target number of objects (count) and target sizes for morphed
     // objects.
     let target_count = sample_object_count(rng, min_count)?;
-    let mut target_sizes = sample_object_sizes(rng, target_count, obj_min_size)?;
+    let mut target_sizes = sample_object_sizes(rng, target_count)?;
 
     // Match target sizes to objects.
     // We will consider each target_size and decide whether to use it to pad

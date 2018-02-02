@@ -76,9 +76,10 @@ pub fn sample_html_size<R: Rng>(rng: &mut R, ge: usize) -> Result<usize, ()> {
 ///
 /// Samples the sizes of n objects from a log-normal distribution
 /// specified by the distribution parameters OBJECT_SIZE_DIST.
-pub fn sample_object_sizes<R: Rng>(rng: &mut R, n: usize, ge: usize)
+pub fn sample_object_sizes<R: Rng>(rng: &mut R, n: usize)
         -> Result<Vec<usize>, ()> {
 
+    let ge = 1
     (0..n).into_iter()
           .map(|_| sample(rng, OBJECT_SIZE_DIST, ge))
           .collect()
