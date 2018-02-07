@@ -149,7 +149,7 @@ mod tests {
 
         let min_count = objects.len();
 
-        morph_from_distribution(&mut rng, &mut objects, min_count);
+        morph_from_distribution(&mut rng, &mut objects, min_count)?;
 
         let expected_sizes = vec![1048, 2167, 3824, 4230, 1131, 1215, 1529,
             1897, 4260, 5343, 5373, 8315, 8513, 10687, 12617, 12807, 13867,
