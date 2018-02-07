@@ -157,7 +157,7 @@ mod tests {
             + HTML_COMMENT_END_SIZE;
         let pad_len = Range::new(0, comment_syntax_size)
             .ind_sample(&mut rng);
-        let padding = get_html_padding(pad_len, &mut rng);
+        get_html_padding(pad_len, &mut rng);
     }
 
 
@@ -231,7 +231,7 @@ mod tests {
             + CSS_COMMENT_END_SIZE;
         let pad_len = Range::new(0, comment_syntax_size)
             .ind_sample(&mut rng);
-        let padding = get_css_padding(pad_len, &mut rng);
+        get_css_padding(pad_len, &mut rng);
     }
 
 
