@@ -1,5 +1,4 @@
-use rand::{Rng, sample, weak_rng, XorShiftRng};
-use rand::os::OsRng;
+use rand::{Rng, weak_rng};
 
 use pad::*;
 use objects::*;
@@ -122,7 +121,7 @@ fn insert_objects_refs(html: &mut Object, objects: &Vec<Object>) -> Result<(), (
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand::{Rng, StdRng, SeedableRng};
+    use rand::{SeedableRng, XorShiftRng};
 
     fn generate_objects() -> Vec<Object> {
         let object_sizes: Vec<usize> = vec![400, 2000, 1000, 100];
