@@ -208,7 +208,7 @@ mod tests {
     //     let pad_len = Range::new(comment_syntax_size, 50)
     //         .ind_sample(&mut rng);
     //     let target_size = raw_len + pad_len;
-    //     let obj_ptr = pad_object(&raw, "css", target_size);
+    //     let obj_ptr = morph_object(&raw, "css", target_size);
     //     unsafe {
     //         for i in 0..raw_len {
     //             assert_eq!(raw[i], *obj_ptr.offset(i as isize));
@@ -234,7 +234,7 @@ mod tests {
     //     assert_eq!(raw.len(), raw_len);
     //     let pad_len = Range::new(0, 50).ind_sample(&mut rng);
     //     let target_size = raw_len + pad_len;
-    //     let obj_ptr = pad_object(&raw, "alpaca", target_size);
+    //     let obj_ptr = morph_object(&raw, "alpaca", target_size);
     //     unsafe {
     //         for i in 0..raw_len {
     //             assert_eq!(raw[i], *obj_ptr.offset(i as isize));
@@ -249,6 +249,6 @@ mod tests {
     //     let raw_len = Range::new(1, 50).ind_sample(&mut rng);
     //     let raw = rng.gen_iter::<u8>().take(raw_len).collect::<Vec<u8>>();
     //     assert_eq!(raw.len(), raw_len);
-    //     let obj_ptr = pad_object(&raw, "alpaca", raw_len - 1);
+    //     let obj_ptr = morph_object(&raw, "alpaca", raw_len - 1);
     // }
 }
