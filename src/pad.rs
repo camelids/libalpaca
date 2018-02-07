@@ -13,6 +13,8 @@ const HTML_COMMENT_START_SIZE: usize = 4;
 static HTML_COMMENT_END: &'static str = "-->";
 const HTML_COMMENT_END_SIZE: usize = 3;
 
+/// When Paddable is implemented for a data type, we can pad objects of that
+/// data type.
 pub trait Paddable {
     /// Pads an object up to a given size.
     ///
