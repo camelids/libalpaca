@@ -55,11 +55,17 @@ mod tests {
     use rand::distributions::{IndependentSample, Range};
     use rand::{Rng, weak_rng};
 
+    #[test]
     fn test_object_from_and_as_ptr_jpg() {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
         let raw = rng.gen_iter::<u8>().take(raw_len).collect::<Vec<u8>>();
-        let mut object = Object::from(&raw, "jpg");
+        let object = Object {
+            kind: ObjectKind::IMG,
+            content: raw.to_vec(),
+            position: None,
+            target_size: None,
+        };
         assert_eq!(object.content.len(), raw_len);
         assert!(match object.kind {
             ObjectKind::IMG => true,
