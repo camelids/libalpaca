@@ -27,52 +27,24 @@ can be used by web server modules.
 
 1.1 API Overview
 
-   libalpaca provides the following functions:
+   libalpaca exposes the following function:
 
-     -  char *morph_page(char *html) : Takes as input an HTML page, parses its
-        objects, samples the padding to apply to each object (and potential new
-        objects to create) and adds this information to the objects' URLs
-        (e.g., "/img.png" -> "/img.png?alpaca-padding=300"), and returns the
-        morphed and adequately padded HTML page.
-     -  unsigned char *pad_object(unsigned char *raw,
-                                  unsigned int file_type,
-                                  unsigned int target_size):
-        Takes as input an object as binary data, its type (see following
-        function) and its target size in bytes, and returns the padded object.
-     -  unsigned int parse_object_type(char *request): Takes as input a request
-        string (e.g., "/img.png?uid=...&...") and returns the requested
-        object's type according to libalpaca's conventions.
+     unsigned char *morph_object(unsigned char *object, char *request)
 
-1.2 Inside the Module
+   This function takes as input an object (e.g., HTML page, CSS, image) and the
+   respective client request, and, with respect to the object type, performs
+   the following:
 
-   We describe how the Module should operate upon receiving client requests.
-   In the case of nginx this function can be implemented in
-   `ngx_http_catch_body_filter()` [0].
-
-   Pseudo code:
-
-      Input: (unsigned char *raw_object, char *request_path)
-
-      object_type = parse_object_type(request_path)
-
-      if object_type == 1       // This means the object type is HTML
-            new_object = morph_page(raw_object)
-      else
-            target_size = parse_target_size(request_path)
-            // NOTE: need to keep an alpaca object somewhere on server
-            new_object = pad_object(raw_object, object_type, target_size)
-
-      Output: new_object
-
-   The function receives as input a raw binary representation of the object,
-   and the request string.
-   It first gets the object type, which is later used internally by ALPaCA.
-   If the object type is HTML (object_type == 1), then morph_page() is called
-   to decide how the page will be morphed for the particular client that
-   requested it, and which returns the respective HTML object.
-   Otherwise, pad_object() is called; note that in this case, if the
-   object_type is 0 (i.e., ALPaCA object type), then a new object of random
-   data is returned.
+    -  If the object is NOT HTML: it reads the HTTP GET parameter
+       `alpaca-padding` from the request, pads the object to the size specified
+       by such parameter by appropriately appending random data, and returns
+       the padded object.
+    -  If the object is HTML: it parses the object's content, determines the
+       size of the objects referenced by its URLs, samples from a distribution
+       a new size for each of them (with the possibility of inserting new
+       "padding" objects), appends such sizes as a parameter for the objects'
+       URLs in the body (e.g., "/img.png" may become
+       "/img.png?alpaca-padding=300"), and returns the HTML page.
 
 2. libalpaca
 
@@ -80,13 +52,13 @@ can be used by web server modules.
    
 2.1 Preliminaries
 
-    Object types are associated with an unsigned int.
+    We define the following object types.
 
-       ALPACA_T = 0
-       HTML_T = 1
-       CSS_T = 2
-       IMG_T = 3
-       UNKNOWN_T = 4
+       ALPACA_TYPE
+       HTML_TYPE
+       CSS_TYPE
+       BINARY_TYPE
+       UNKNOWN_TYPE
     
     Probability distributions and configuration files will be stored in:
         
@@ -95,7 +67,34 @@ can be used by web server modules.
     For internal signalling within the library, the server should store an
     empty file at the following location:
       
-       ALPACA_RND_PATH = /alpaca.rnd
+       ALPACA_PAD_PATH = /alpaca.pad
+
+2.2 Protocol Overview
+
+    This section gives a high level overview of the protocol.
+
+2.3 Objects' Padding
+
+    This section describes how objects are padded.
+
+2.3.1 Randomness Source
+
+    Can we use a fixed uniformly sampled string, or would this expose the
+    server to padding-related attacks?
+
+2.3.2 HTML_TYPE
+
+2.3.3 CSS_TYPE
+
+2.3.4 IMG_TYPE
+
+2.3.5 BINARY_TYPE, UNKNOWN_TYPE
+
+2.4 Page Sampling
+
+    How a target page is sampled from a distribution.
+
+2.5 Morphing Algorithm
 
 3. Deployment Considerations
 
