@@ -1,3 +1,4 @@
+//! Defines object data model used by libalpaca.
 use parsing::parse_object_kind;
 
 #[derive(PartialEq)]

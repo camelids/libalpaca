@@ -1,3 +1,4 @@
+//! Contains main morphing routines.
 use rand::{Rng, weak_rng};
 
 use pad::*;

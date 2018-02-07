@@ -1,3 +1,4 @@
+//! Contains padding functions for different resource types.
 use rand::{Rng, sample, weak_rng, XorShiftRng};
 use std::iter::Extend;
 
