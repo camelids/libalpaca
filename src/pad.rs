@@ -94,7 +94,7 @@ mod tests {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
         let raw = sample(&mut rng, 46..127, raw_len);
-        let mut object = Object{
+        let mut object = Object {
             kind: ObjectKind::HTML,
             content: raw.to_vec(),
             position: None,
@@ -168,7 +168,7 @@ mod tests {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
         let raw = sample(&mut rng, 43..127, raw_len);
-        let mut object = Object{
+        let mut object = Object {
             kind: ObjectKind::CSS,
             content: raw.to_vec(),
             position: None,
@@ -242,7 +242,7 @@ mod tests {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
         let raw = rng.gen_iter::<u8>().take(raw_len).collect::<Vec<u8>>();
-        let mut object = Object{
+        let mut object = Object {
             kind: ObjectKind::IMG,
             content: raw.to_vec(),
             position: None,
