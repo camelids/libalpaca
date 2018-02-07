@@ -10,19 +10,19 @@ struct DistParams {
 }
 
 // Hardcoded parameters for log-normal distributions.
-const OBJECT_COUNT_DIST: DistParams = DistParams { mean: 1.0,
-                                                   std_dev: 1.0,
+const OBJECT_COUNT_DIST: DistParams = DistParams { mean: 0.4,
+                                                   std_dev: 2.0,
                                                  };
-const OBJECT_SIZE_DIST: DistParams = DistParams { mean: 1.0,
+const OBJECT_SIZE_DIST: DistParams = DistParams { mean: 8.8,
                                                   std_dev: 1.0,
                                                 };
-const HTML_SIZE_DIST: DistParams = DistParams { mean: 1.0,
+const HTML_SIZE_DIST: DistParams = DistParams { mean: 8.8,
                                                 std_dev: 1.0,
                                               };
 
 // Number of tries per sample. If no sampled number satisfies a specified
 // threshold after `SAMPLE_LIMIT` tries the sampling function returns Err.
-const SAMPLE_LIMIT: i8 = 100;
+const SAMPLE_LIMIT: usize = 30;
 
 /// Samples an `usize` number according to the log-normal distribution
 /// with the specified parameters.
@@ -76,9 +76,9 @@ pub fn sample_html_size<R: Rng>(rng: &mut R, ge: usize) -> Result<usize, ()> {
 ///
 /// Samples the sizes of n objects from a log-normal distribution
 /// specified by the distribution parameters OBJECT_SIZE_DIST.
-pub fn sample_object_sizes<R: Rng>(rng: &mut R, n: usize, ge: usize)
+pub fn sample_object_sizes<R: Rng>(rng: &mut R, n: usize)
         -> Result<Vec<usize>, ()> {
-
+    let ge = 1;
     (0..n).into_iter()
           .map(|_| sample(rng, OBJECT_SIZE_DIST, ge))
           .collect()
