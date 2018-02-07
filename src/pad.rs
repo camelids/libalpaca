@@ -87,40 +87,16 @@ mod tests {
     use std::str;
 
     #[test]
-    fn test_pad_object_html() {
-        let mut rng = weak_rng();
-        let raw_len = Range::new(0, 50).ind_sample(&mut rng);
-        let raw = sample(&mut rng, 46..127, raw_len);
-        assert_eq!(raw.len(), raw_len);
-        let comment_syntax_size = HTML_COMMENT_START_SIZE
-            + HTML_COMMENT_END_SIZE;
-        let pad_len = Range::new(comment_syntax_size, 50)
-            .ind_sample(&mut rng);
-        let target_size = raw_len + pad_len;
-        let obj_ptr = pad_object(&raw, "html", target_size);
-        unsafe {
-            for i in 0..raw_len {
-                assert_eq!(raw[i], *obj_ptr.offset(i as isize));
-            }
-            for i in 0..HTML_COMMENT_START_SIZE {
-                assert_eq!(HTML_COMMENT_START.as_bytes()[i],
-                           *obj_ptr.offset(raw_len as isize + i as isize));
-            }
-            for i in 0..HTML_COMMENT_END_SIZE {
-                assert_eq!(HTML_COMMENT_END.as_bytes()[i],
-                           *obj_ptr.offset(target_size as isize
-                                       - HTML_COMMENT_END_SIZE as isize
-                                       + i as isize));
-            }
-        }
-    }
-
-    #[test]
     fn test_pad_method_html() {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
         let raw = sample(&mut rng, 46..127, raw_len);
-        let mut object = Object::from(&raw, "html");
+        let mut object = Object{
+            kind: ObjectKind::HTML,
+            content: raw.to_vec(),
+            position: None,
+            target_size: None,
+        };
         assert_eq!(object.content.len(), raw_len);
         assert!(match object.kind {
             ObjectKind::HTML => true,
@@ -132,7 +108,7 @@ mod tests {
         let pad_len = Range::new(comment_syntax_size, 50)
             .ind_sample(&mut rng);
         let target_size = raw_len + pad_len;
-        object.pad(target_size, &mut rng);
+        object.pad(target_size);
         assert_eq!(object.content.len(), target_size);
         _test_html_padding(object.content[raw_len..].to_vec());
         // The original object has not changed.
@@ -183,41 +159,18 @@ mod tests {
         let padding = get_html_padding(pad_len, &mut rng);
     }
 
-    #[test]
-    fn test_pad_object_css() {
-        let mut rng = weak_rng();
-        let raw_len = Range::new(0, 50).ind_sample(&mut rng);
-        let raw = sample(&mut rng, 43..127, raw_len);
-        assert_eq!(raw.len(), raw_len);
-        let comment_syntax_size = CSS_COMMENT_START_SIZE
-            + CSS_COMMENT_END_SIZE;
-        let pad_len = Range::new(comment_syntax_size, 50)
-            .ind_sample(&mut rng);
-        let target_size = raw_len + pad_len;
-        let obj_ptr = pad_object(&raw, "css", target_size);
-        unsafe {
-            for i in 0..raw_len {
-                assert_eq!(raw[i], *obj_ptr.offset(i as isize));
-            }
-            for i in 0..CSS_COMMENT_START_SIZE {
-                assert_eq!(CSS_COMMENT_START.as_bytes()[i],
-                           *obj_ptr.offset(raw_len as isize + i as isize));
-            }
-            for i in 0..CSS_COMMENT_END_SIZE {
-                assert_eq!(CSS_COMMENT_END.as_bytes()[i],
-                           *obj_ptr.offset(target_size as isize
-                                       - CSS_COMMENT_END_SIZE as isize
-                                       + i as isize));
-            }
-        }
-    }
 
     #[test]
     fn test_pad_method_css() {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
         let raw = sample(&mut rng, 43..127, raw_len);
-        let mut object = Object::from(&raw, "css");
+        let mut object = Object{
+            kind: ObjectKind::CSS,
+            content: raw.to_vec(),
+            position: None,
+            target_size: None,
+        };
         assert_eq!(object.content.len(), raw_len);
         assert!(match object.kind {
             ObjectKind::CSS => true,
@@ -229,7 +182,7 @@ mod tests {
         let pad_len = Range::new(comment_syntax_size, 50)
             .ind_sample(&mut rng);
         let target_size = raw_len + pad_len;
-        object.pad(target_size, &mut rng);
+        object.pad(target_size);
         assert_eq!(object.content.len(), target_size);
         _test_css_padding(object.content[raw_len..].to_vec());
         // The original object has not changed.
@@ -280,28 +233,18 @@ mod tests {
         let padding = get_css_padding(pad_len, &mut rng);
     }
 
-    #[test]
-    fn test_pad_object_alpaca() {
-        let mut rng = weak_rng();
-        let raw_len = Range::new(0, 50).ind_sample(&mut rng);
-        let raw = rng.gen_iter::<u8>().take(raw_len).collect::<Vec<u8>>();
-        assert_eq!(raw.len(), raw_len);
-        let pad_len = Range::new(0, 50).ind_sample(&mut rng);
-        let target_size = raw_len + pad_len;
-        let obj_ptr = pad_object(&raw, "alpaca", target_size);
-        unsafe {
-            for i in 0..raw_len {
-                assert_eq!(raw[i], *obj_ptr.offset(i as isize));
-            }
-        }
-    }
 
     #[test]
     fn test_pad_method_png() {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
         let raw = rng.gen_iter::<u8>().take(raw_len).collect::<Vec<u8>>();
-        let mut object = Object::from(&raw, "png");
+        let mut object = Object{
+            kind: ObjectKind::IMG,
+            content: raw.to_vec(),
+            position: None,
+            target_size: None,
+        };
         assert_eq!(object.content.len(), raw_len);
         assert!(match object.kind {
             ObjectKind::IMG => true,
@@ -310,7 +253,7 @@ mod tests {
 
         let pad_len = Range::new(0, 50).ind_sample(&mut rng);
         let target_size = raw_len + pad_len;
-        object.pad(target_size, &mut rng);
+        object.pad(target_size);
         assert_eq!(object.content.len(), target_size);
         // The original object has not changed.
         assert_eq!(object.content[..raw_len], raw[..])
@@ -324,13 +267,4 @@ mod tests {
         assert_eq!(padding.len(), pad_len);
     }
 
-    #[should_panic]
-    #[test]
-    fn test_pad_object_too_small() {
-        let mut rng = weak_rng();
-        let raw_len = Range::new(1, 50).ind_sample(&mut rng);
-        let raw = rng.gen_iter::<u8>().take(raw_len).collect::<Vec<u8>>();
-        assert_eq!(raw.len(), raw_len);
-        let obj_ptr = pad_object(&raw, "alpaca", raw_len - 1);
-    }
 }

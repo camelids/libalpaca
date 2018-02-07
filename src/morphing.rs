@@ -136,9 +136,9 @@ mod tests {
     }
 
     fn init_seeded_rng() -> XorShiftRng {
-        let s: Vec<usize> = vec![0, 0];
+        let s: [u32; 4] = [0, 1, 2, 3];
 
-        XorShiftRng::from_seed(&s[..])
+        XorShiftRng::from_seed(s)
     }
 
     #[test]
@@ -148,17 +148,105 @@ mod tests {
         let mut rng = init_seeded_rng();
 
         let min_count = objects.len();
-        let obj_min_size = objects.iter()
-                                  .map(|o| o.content.len())
-                                  .min()
-                                  .expect("No objects in this page");
 
-        morph_from_distribution(&mut rng, &mut objects, min_count, obj_min_size);
+        morph_from_distribution(&mut rng, &mut objects, min_count);
 
-        let expected_sizes = vec![589, 2273, 5395, 8171, 1128, 1664, 11858];
+        let expected_sizes = vec![1048, 2167, 3824, 4230, 1131, 1215, 1529,
+            1897, 4260, 5343, 5373, 8315, 8513, 10687, 12617, 12807, 13867,
+            14644, 24146];
         let new_sizes = objects.iter()
                                .map(|o| o.target_size.expect("Need Some"))
                                .collect::<Vec<_>>();
+        println!("expected sizes: {:?}", new_sizes);
         assert!(new_sizes == expected_sizes);
     }
+    // TODO: I migrated the following `test_pad_object_*` tests from the pad
+    // module, where once lived the pub extern fn `pad_object`, which was later
+    // replaced `morph_object` here. Since testing `morph_object' requires we
+    // first implement `parsing::parse_object_kind`, I'm commenting these tests
+    // out until we've done that.
+    //
+    // #[test]
+    // fn test_pad_object_html() {
+    //     let mut rng = weak_rng();
+    //     let raw_len = Range::new(0, 50).ind_sample(&mut rng);
+    //     let raw = sample(&mut rng, 46..127, raw_len);
+    //     assert_eq!(raw.len(), raw_len);
+    //     let comment_syntax_size = HTML_COMMENT_START_SIZE
+    //         + HTML_COMMENT_END_SIZE;
+    //     let pad_len = Range::new(comment_syntax_size, 50)
+    //         .ind_sample(&mut rng);
+    //     let target_size = raw_len + pad_len;
+    //     let obj_ptr = morph_object(&raw, "html", target_size);
+    //     unsafe {
+    //         for i in 0..raw_len {
+    //             assert_eq!(raw[i], *obj_ptr.offset(i as isize));
+    //         }
+    //         for i in 0..HTML_COMMENT_START_SIZE {
+    //             assert_eq!(HTML_COMMENT_START.as_bytes()[i],
+    //             *obj_ptr.offset(raw_len as isize + i as isize));
+    //         }
+    //         for i in 0..HTML_COMMENT_END_SIZE {
+    //             assert_eq!(HTML_COMMENT_END.as_bytes()[i],
+    //             *obj_ptr.offset(target_size as isize
+    //                             - HTML_COMMENT_END_SIZE as isize
+    //                             + i as isize));
+    //         }
+    //     }
+    // }
+
+    // #[test]
+    // fn test_pad_object_css() {
+    //     let mut rng = weak_rng();
+    //     let raw_len = Range::new(0, 50).ind_sample(&mut rng);
+    //     let raw = sample(&mut rng, 43..127, raw_len);
+    //     assert_eq!(raw.len(), raw_len);
+    //     let comment_syntax_size = CSS_COMMENT_START_SIZE
+    //         + CSS_COMMENT_END_SIZE;
+    //     let pad_len = Range::new(comment_syntax_size, 50)
+    //         .ind_sample(&mut rng);
+    //     let target_size = raw_len + pad_len;
+    //     let obj_ptr = pad_object(&raw, "css", target_size);
+    //     unsafe {
+    //         for i in 0..raw_len {
+    //             assert_eq!(raw[i], *obj_ptr.offset(i as isize));
+    //         }
+    //         for i in 0..CSS_COMMENT_START_SIZE {
+    //             assert_eq!(CSS_COMMENT_START.as_bytes()[i],
+    //                        *obj_ptr.offset(raw_len as isize + i as isize));
+    //         }
+    //         for i in 0..CSS_COMMENT_END_SIZE {
+    //             assert_eq!(CSS_COMMENT_END.as_bytes()[i],
+    //                        *obj_ptr.offset(target_size as isize
+    //                                    - CSS_COMMENT_END_SIZE as isize
+    //                                    + i as isize));
+    //         }
+    //     }
+    // }
+
+    // #[test]
+    // fn test_pad_object_alpaca() {
+    //     let mut rng = weak_rng();
+    //     let raw_len = Range::new(0, 50).ind_sample(&mut rng);
+    //     let raw = rng.gen_iter::<u8>().take(raw_len).collect::<Vec<u8>>();
+    //     assert_eq!(raw.len(), raw_len);
+    //     let pad_len = Range::new(0, 50).ind_sample(&mut rng);
+    //     let target_size = raw_len + pad_len;
+    //     let obj_ptr = pad_object(&raw, "alpaca", target_size);
+    //     unsafe {
+    //         for i in 0..raw_len {
+    //             assert_eq!(raw[i], *obj_ptr.offset(i as isize));
+    //         }
+    //     }
+    // }
+
+    // #[should_panic]
+    // #[test]
+    // fn test_pad_object_too_small() {
+    //     let mut rng = weak_rng();
+    //     let raw_len = Range::new(1, 50).ind_sample(&mut rng);
+    //     let raw = rng.gen_iter::<u8>().take(raw_len).collect::<Vec<u8>>();
+    //     assert_eq!(raw.len(), raw_len);
+    //     let obj_ptr = pad_object(&raw, "alpaca", raw_len - 1);
+    // }
 }
