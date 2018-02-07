@@ -43,8 +43,7 @@ pub extern fn morph_object(object: &[u8], request: &str) -> *const u8 {
 /// `html` - HTML page.
 fn morph_html(html: &mut Object) -> Result<usize, ()> {
     let mut objects = parse_objects(html);
-    objects.sort_unstable_by(|ref o1, ref o2|
-                                o1.content.len().cmp(&o2.content.len()));
+    objects.sort_unstable_by(|a, b| a.content.len().cmp(&b.content.len()));
     // Minimum characteristics.
     let min_count = objects.len();
 
