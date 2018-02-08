@@ -52,8 +52,7 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
     // Try morphing for PAGE_SAMPLE_LIMIT times.
     let mut success = false;
     for _ in 0..PAGE_SAMPLE_LIMIT {
-        if let Ok(_) = morph_from_distribution(&mut rng, &mut objects,
-                                               min_count) {
+        if morph_from_distribution(&mut rng, &mut objects, min_count).is_ok() {
             success = true;
             break;
         }
