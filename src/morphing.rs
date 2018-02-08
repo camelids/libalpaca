@@ -1,13 +1,12 @@
 //! Contains main morphing routines.
-use rand::{Rng, weak_rng};
+use rand::{weak_rng, Rng};
 
 use pad::*;
 use objects::*;
-use parsing::{parse_target_size, parse_objects};
-use distribution::{sample_object_count, sample_html_size, sample_object_sizes};
+use parsing::{parse_objects, parse_target_size};
+use distribution::{sample_html_size, sample_object_count, sample_object_sizes};
 
 const PAGE_SAMPLE_LIMIT: u8 = 10;
-
 
 /// Do ALPaCA's morphing.
 ///
@@ -15,13 +14,12 @@ const PAGE_SAMPLE_LIMIT: u8 = 10;
 /// references to its objects accordingly, and pads it; if it is a different
 /// type of object, it returns the object padded to the specified size.
 #[no_mangle]
-pub extern fn morph_object(object: &[u8], request: &str) -> *const u8 {
+pub extern "C" fn morph_object(object: &[u8], request: &str) -> *const u8 {
     let mut object = Object::from(object, request);
 
     let target_size = if object.kind == ObjectKind::HTML {
         morph_html(&mut object).expect("Failed morphing page")
-    }
-    else {
+    } else {
         parse_target_size(request)
     };
 
@@ -69,9 +67,11 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
     sample_html_size(&mut rng, html_min_size)
 }
 
-fn morph_from_distribution<R: Rng>(rng: &mut R, objects: &mut Vec<Object>,
-        min_count: usize) -> Result<(), ()> {
-
+fn morph_from_distribution<R: Rng>(
+    rng: &mut R,
+    objects: &mut Vec<Object>,
+    min_count: usize,
+) -> Result<(), ()> {
     // Sample target number of objects (count) and target sizes for morphed
     // objects.
     let target_count = sample_object_count(rng, min_count)?;
@@ -84,20 +84,21 @@ fn morph_from_distribution<R: Rng>(rng: &mut R, objects: &mut Vec<Object>,
     // NOTE: array objects is initially sorted.
     target_sizes.sort();
 
-    let n = objects.len();              // Keep track of initial number of objects.
-    let mut i = 0;                      // Pointing at next object to morph.
+    let n = objects.len(); // Keep track of initial number of objects.
+    let mut i = 0; // Pointing at next object to morph.
     for s in target_sizes {
         if (i < n) && (s >= objects[i].content.len()) {
             // Pad i-th object to size s.
             objects[i].target_size = Some(s);
             i += 1;
-        }
-        else {
+        } else {
             // Create new padding object.
-            let o = Object { kind: ObjectKind::Alpaca,
-                             content: Vec::new(),
-                             position: None,
-                             target_size: Some(s)};
+            let o = Object {
+                kind: ObjectKind::Alpaca,
+                content: Vec::new(),
+                position: None,
+                target_size: Some(s),
+            };
             objects.push(o);
         }
     }
@@ -126,12 +127,15 @@ mod tests {
     fn generate_objects() -> Vec<Object> {
         let object_sizes: Vec<usize> = vec![400, 2000, 1000, 100];
 
-        object_sizes.iter()
-                    .map(|s| Object { kind: ObjectKind::Unknown,
-                                      content: vec![0u8; *s],
-                                      position: None,
-                                      target_size: None })
-                    .collect()
+        object_sizes
+            .iter()
+            .map(|s| Object {
+                kind: ObjectKind::Unknown,
+                content: vec![0u8; *s],
+                position: None,
+                target_size: None,
+            })
+            .collect()
     }
 
     fn init_seeded_rng() -> XorShiftRng {
@@ -142,22 +146,23 @@ mod tests {
 
     #[test]
     fn test_morph_objects_from_distribution() {
-
         let mut objects = generate_objects();
         let mut rng = init_seeded_rng();
 
         let min_count = objects.len();
 
         if let Err(_) = morph_from_distribution(&mut rng, &mut objects, min_count) {
-            assert!(false);   
+            assert!(false);
         }
 
-        let expected_sizes = vec![1048, 2167, 3824, 4230, 1131, 1215, 1529,
-            1897, 4260, 5343, 5373, 8315, 8513, 10687, 12617, 12807, 13867,
-            14644, 24146];
-        let new_sizes = objects.iter()
-                               .map(|o| o.target_size.expect("Need Some"))
-                               .collect::<Vec<_>>();
+        let expected_sizes = vec![
+            1048, 2167, 3824, 4230, 1131, 1215, 1529, 1897, 4260, 5343, 5373, 8315, 8513, 10687,
+            12617, 12807, 13867, 14644, 24146,
+        ];
+        let new_sizes = objects
+            .iter()
+            .map(|o| o.target_size.expect("Need Some"))
+            .collect::<Vec<_>>();
         println!("expected sizes: {:?}", new_sizes);
         assert!(new_sizes == expected_sizes);
     }
