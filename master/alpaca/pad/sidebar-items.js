@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Paddable","When Paddable is implemented for a data type, we can pad objects of that data type."]]});

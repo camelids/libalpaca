@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ObjectKind","Defines our basic object types, each of which has a corresponding unique (distribution, padding type) tuple."]],"struct":[["Object","An object to be used in the morphing process."]]});

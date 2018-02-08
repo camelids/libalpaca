@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["distribution","Provides functions to sample objects' count and size from a probability distribution."],["morphing","Contains main morphing routines."],["objects","Defines object data model used by libalpaca."],["pad","Contains padding functions for different resource types."],["parsing","Contains parsing routines"]]});
