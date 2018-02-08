@@ -5,6 +5,7 @@
 </p>
 
 [![Travis branch](https://img.shields.io/travis/camelids/libalpaca/master.svg)](https://travis-ci.org/camelids/libalpaca)
+[![Codecov branch](https://img.shields.io/codecov/c/github/camelids/libalpaca/master.svg)](https://codecov.io/gh/camelids/libalpaca)
 
 This is a library for implementing ALPaCA defense [1] on web servers.
 
