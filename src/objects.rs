@@ -43,7 +43,7 @@ impl Object {
     /// Returns a raw pointer to our Object's 'content' field's slice's buffer.
     /// "The caller must ensure that the slice outlives the pointer this
     /// function returns, or else it will end up pointing to garbage."
-    pub fn as_ptr(self) -> *const u8 {
+    pub fn as_ptr(&self) -> *const u8 {
         self.content.as_ptr()
     }
 }
