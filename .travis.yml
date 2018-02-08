@@ -1,14 +1,15 @@
 language: rust
+cache: cargo
+env: # required for allow_failures
 rust:
   - stable
   - beta
   - nightly 
-script: |
-  cargo build --verbose &&
-  cargo test  --verbose &&
-  cargo doc   --verbose
-cache: cargo
+
 matrix:
+  fast_finish: true
+  allow_failures:
+    - env: NAME='cargo-travis'
   include:
     - rust: nightly
       env: # use env so updating versions causes cache invalidation
@@ -18,4 +19,31 @@ matrix:
         - cargo install clippy --version $CLIPPY_VERSION || echo "clippy already installed"
       script:
         - cargo fmt -- --write-mode=diff
-        - cargo clippy -- -D clippy
+    - env: NAME='cargo-travis'
+      sudo: required # travis-ci/travis-ci#9061
+      before_script:
+        - cargo install cargo-update || ehco "cargo-update already installed"
+        - cargo install cargo-travis || echo "cargo-travis already installed"
+        - cargo install-update -a
+      script:
+        - |
+          cargo build    --verbose &&
+          cargo coverage --verbose &&
+          bash <(curl -s https://codecov.io/bash) -s target/kcov
+      addons: # required for kcov
+        apt:
+          packages:
+            - libcurl4-openssl-dev
+            - libelf-dev
+            - libdw-dev
+            - binutils-dev
+            - cmake
+
+script: |
+  cargo build --verbose &&
+  cargo test  --verbose &&
+  cargo doc   --verbose
+
+notifications:
+  slack:
+    secure: a7Y7W3jBBo/IblQPHohftmvywdf6W1+2hu9J6JEgdQ5AA9svITSEo+3ki8zMk1Ouh153+wwlB3JM3EfrhIR+C98aXN4NQmkI+ahSrhQ0piebJPque036LiwWEHZTStwXROH7iA13HyPYtRmoRSSk1BHv67y4IqKFsl1X29hdTsWDlm/+tCv+MNcaeFEBZmD1MX9DxNM4E30DeFuMWCkj+2oPBQ3YOaA7+Moum8jd68ctoKA0B4lejBWpsRYYqILeYcpn9/LFGR8xc3NHVV6Cz68boo0Bm1z1KuV5iANtu3iHAxOe0H4RKwKgh/2ZC5vJ6FcuF2mpnotQ0J6bFdpKK+dCCzXTkAnIh0caj1gE+N/KCH7t2NE9XtTnn5bP31aBFcb/jW2L08HqTeq3yGbBUCILkW6ks32fCsYaS+zYKmGY4WxkFH80gUqfvvCRiWteaoenTVSIg0gb/PqmuB0KYzJxcINWpVv3vZsRIrKQ3JP787YyZqaw7f+NwP6MGxjc9VMyyM2ZXUyxgY7bxUhY6kzd0XTl6iJlc66A1Y4Xhw3yV9AlJndcS0rlewFVzndQRNM9B5oDUX1ZYk3+fgHFA1OAXaivP+ee1hzVCksgxXWGUdchLNtfzhTYkFDzeaiPKQYeacNDqv+Teo1Vo8MCwgyWhHm5qPgngp4khM8O7rU=
