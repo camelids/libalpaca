@@ -57,7 +57,7 @@ fn sample<R: Rng>(rng: &mut R, params: DistParams, ge: usize)
 /// Samples a new object count.
 ///
 /// Samples a new object count from a log-normal distribution
-/// specified by the distribution parameters OBJECT_COUNT_DIST.
+/// specified by the distribution parameters `OBJECT_COUNT_DIST`.
 pub fn sample_object_count<R: Rng>(rng: &mut R, ge: usize) -> Result<usize, ()> {
 
     sample(rng, OBJECT_COUNT_DIST, ge)
@@ -66,7 +66,7 @@ pub fn sample_object_count<R: Rng>(rng: &mut R, ge: usize) -> Result<usize, ()> 
 /// Samples the size of an HTML page.
 ///
 /// Samples the size of an HTML page from a log-normal distribution
-/// specified by the distribution parameters HTML_SIZE_DIST.
+/// specified by the distribution parameters `HTML_SIZE_DIST`.
 pub fn sample_html_size<R: Rng>(rng: &mut R, ge: usize) -> Result<usize, ()> {
 
     sample(rng, HTML_SIZE_DIST, ge)
@@ -75,7 +75,7 @@ pub fn sample_html_size<R: Rng>(rng: &mut R, ge: usize) -> Result<usize, ()> {
 /// Samples a new object count.
 ///
 /// Samples the sizes of n objects from a log-normal distribution
-/// specified by the distribution parameters OBJECT_SIZE_DIST.
+/// specified by the distribution parameters `OBJECT_SIZE_DIST`.
 pub fn sample_object_sizes<R: Rng>(rng: &mut R, n: usize)
         -> Result<Vec<usize>, ()> {
     let ge = 1;
