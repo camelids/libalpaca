@@ -39,7 +39,7 @@ const SAMPLE_LIMIT: usize = 30;
 /// The sampled number. The function tries `SAMPLE_LIMIT` times to sample
 /// a number satisfying the threshold. If no number satisfies it, it returns
 /// Err(()).
-fn sample<R: Rng>(rng: &mut R, params: DistParams, ge: usize)
+fn sample<R: Rng>(rng: &mut R, params: &DistParams, ge: usize)
         -> Result<usize, ()> {
 
     let mut dist = LogNormal::new(params.mean, params.std_dev);
@@ -60,7 +60,7 @@ fn sample<R: Rng>(rng: &mut R, params: DistParams, ge: usize)
 /// specified by the distribution parameters `OBJECT_COUNT_DIST`.
 pub fn sample_object_count<R: Rng>(rng: &mut R, ge: usize) -> Result<usize, ()> {
 
-    sample(rng, OBJECT_COUNT_DIST, ge)
+    sample(rng, &OBJECT_COUNT_DIST, ge)
 }
 
 /// Samples the size of an HTML page.
@@ -69,7 +69,7 @@ pub fn sample_object_count<R: Rng>(rng: &mut R, ge: usize) -> Result<usize, ()> 
 /// specified by the distribution parameters `HTML_SIZE_DIST`.
 pub fn sample_html_size<R: Rng>(rng: &mut R, ge: usize) -> Result<usize, ()> {
 
-    sample(rng, HTML_SIZE_DIST, ge)
+    sample(rng, &HTML_SIZE_DIST, ge)
 }
 
 /// Samples a new object count.
@@ -80,6 +80,6 @@ pub fn sample_object_sizes<R: Rng>(rng: &mut R, n: usize)
         -> Result<Vec<usize>, ()> {
     let ge = 1;
     (0..n).into_iter()
-          .map(|_| sample(rng, OBJECT_SIZE_DIST, ge))
+          .map(|_| sample(rng, &OBJECT_SIZE_DIST, ge))
           .collect()
 }
