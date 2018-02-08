@@ -114,7 +114,7 @@ fn morph_from_distribution<R: Rng>(rng: &mut R, objects: &mut Vec<Object>,
 }
 
 #[allow(unused)]
-fn insert_objects_refs(html: &mut Object, objects: &Vec<Object>) -> Result<(), ()> {
+fn insert_objects_refs(html: &mut Object, objects: &[Object]) -> Result<(), ()> {
     unimplemented!();
 }
 
