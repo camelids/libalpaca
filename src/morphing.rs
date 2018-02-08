@@ -52,8 +52,7 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
     // Try morphing for PAGE_SAMPLE_LIMIT times.
     let mut success = false;
     for _ in 0..PAGE_SAMPLE_LIMIT {
-        if let Ok(_) = morph_from_distribution(&mut rng, &mut objects,
-                                               min_count) {
+        if morph_from_distribution(&mut rng, &mut objects, min_count).is_ok() {
             success = true;
             break;
         }
@@ -115,7 +114,7 @@ fn morph_from_distribution<R: Rng>(rng: &mut R, objects: &mut Vec<Object>,
 }
 
 #[allow(unused)]
-fn insert_objects_refs(html: &mut Object, objects: &Vec<Object>) -> Result<(), ()> {
+fn insert_objects_refs(html: &mut Object, objects: &[Object]) -> Result<(), ()> {
     unimplemented!();
 }
 

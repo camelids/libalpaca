@@ -2,8 +2,18 @@ language: rust
 rust:
   - stable
   - beta
-  - nightly
-matrix:
-  allow_failures:
-    - rust: nightly
+  - nightly 
+script: |
+  cargo build --verbose &&
+  cargo test  --verbose &&
+  cargo doc   --verbose
 cache: cargo
+matrix:
+  include:
+    - rust: nightly
+      env: # use env so updating versions causes cache invalidation
+        - CLIPPY_VERSION=0.0.186
+      before_script:
+        - cargo install clippy --version $CLIPPY_VERSION || echo "clippy already installed"
+      script:
+        - cargo clippy
