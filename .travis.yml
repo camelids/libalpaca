@@ -43,3 +43,7 @@ script: |
   cargo build --verbose &&
   cargo test  --verbose &&
   cargo doc   --verbose
+
+notifications:
+  slack:
+    secure: a7Y7W3jBBo/IblQPHohftmvywdf6W1+2hu9J6JEgdQ5AA9svITSEo+3ki8zMk1Ouh153+wwlB3JM3EfrhIR+C98aXN4NQmkI+ahSrhQ0piebJPque036LiwWEHZTStwXROH7iA13HyPYtRmoRSSk1BHv67y4IqKFsl1X29hdTsWDlm/+tCv+MNcaeFEBZmD1MX9DxNM4E30DeFuMWCkj+2oPBQ3YOaA7+Moum8jd68ctoKA0B4lejBWpsRYYqILeYcpn9/LFGR8xc3NHVV6Cz68boo0Bm1z1KuV5iANtu3iHAxOe0H4RKwKgh/2ZC5vJ6FcuF2mpnotQ0J6bFdpKK+dCCzXTkAnIh0caj1gE+N/KCH7t2NE9XtTnn5bP31aBFcb/jW2L08HqTeq3yGbBUCILkW6ks32fCsYaS+zYKmGY4WxkFH80gUqfvvCRiWteaoenTVSIg0gb/PqmuB0KYzJxcINWpVv3vZsRIrKQ3JP787YyZqaw7f+NwP6MGxjc9VMyyM2ZXUyxgY7bxUhY6kzd0XTl6iJlc66A1Y4Xhw3yV9AlJndcS0rlewFVzndQRNM9B5oDUX1ZYk3+fgHFA1OAXaivP+ee1hzVCksgxXWGUdchLNtfzhTYkFDzeaiPKQYeacNDqv+Teo1Vo8MCwgyWhHm5qPgngp4khM8O7rU=
