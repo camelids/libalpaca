@@ -7,11 +7,10 @@
 [![Travis branch](https://img.shields.io/travis/camelids/libalpaca/master.svg)](https://travis-ci.org/camelids/libalpaca)
 [![Codecov branch](https://img.shields.io/codecov/c/github/camelids/libalpaca/master.svg)](https://codecov.io/gh/camelids/libalpaca)
 
-This is a library for implementing ALPaCA defense [1] on web servers.
+:construction: WARNING: The code is currently under construction and not safe to use. :construction:
 
-*Disclaimer* The code is currently under construction and not safe to use.
+This library implements the ALPaCA website fingerprinting defense, and is intended for the creation web server modules.
 
-You may find a draft of the specs at [design/specs.txt](https://github.com/camelids/libalpaca/blob/master/design/specs.txt).
-
-
-[1] https://www.degruyter.com/view/j/popets.2017.2017.issue-2/popets-2017-0023/popets-2017-0023.xml
+[Documentation](https://camelids.github.io/libalpaca/master/alpaca/) |
+[Specs](https://github.com/camelids/libalpaca/blob/master/design/specs.txt) |
+[Paper](https://www.degruyter.com/view/j/popets.2017.2017.issue-2/popets-2017-0023/popets-2017-0023.xml)
