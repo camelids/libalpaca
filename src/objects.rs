@@ -53,7 +53,7 @@ mod tests {
     use super::*;
 
     use rand::distributions::{IndependentSample, Range};
-    use rand::{Rng, weak_rng};
+    use rand::{weak_rng, Rng};
 
     #[test]
     fn test_object_from_and_as_ptr_jpg() {
@@ -69,7 +69,7 @@ mod tests {
         assert_eq!(object.content.len(), raw_len);
         assert!(match object.kind {
             ObjectKind::IMG => true,
-            _               => false,
+            _ => false,
         });
 
         let obj_ptr = object.as_ptr();

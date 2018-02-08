@@ -14,6 +14,8 @@ matrix:
       env: # use env so updating versions causes cache invalidation
         - CLIPPY_VERSION=0.0.186
       before_script:
+        - rustup component add rustfmt-preview
         - cargo install clippy --version $CLIPPY_VERSION || echo "clippy already installed"
       script:
-        - cargo clippy
+        - cargo fmt -- --write-mode=diff
+        - cargo clippy -- -D clippy

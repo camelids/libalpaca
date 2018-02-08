@@ -1,5 +1,5 @@
 //! Contains padding functions for different resource types.
-use rand::{Rng, sample, weak_rng, XorShiftRng};
+use rand::{sample, weak_rng, Rng, XorShiftRng};
 use std::iter::Extend;
 
 use objects::*;
@@ -23,7 +23,6 @@ pub trait Paddable {
     /// * `target_size` - The target size.
     fn pad(&mut self, usize);
 }
-
 
 impl Paddable for Object {
     /// Pads an object up to a given size.
@@ -103,13 +102,11 @@ mod tests {
         assert_eq!(object.content.len(), raw_len);
         assert!(match object.kind {
             ObjectKind::HTML => true,
-            _                => false,
+            _ => false,
         });
 
-        let comment_syntax_size = HTML_COMMENT_START_SIZE
-            + HTML_COMMENT_END_SIZE;
-        let pad_len = Range::new(comment_syntax_size, 50)
-            .ind_sample(&mut rng);
+        let comment_syntax_size = HTML_COMMENT_START_SIZE + HTML_COMMENT_END_SIZE;
+        let pad_len = Range::new(comment_syntax_size, 50).ind_sample(&mut rng);
         let target_size = raw_len + pad_len;
         object.pad(target_size);
         assert_eq!(object.content.len(), target_size);
@@ -120,11 +117,9 @@ mod tests {
 
     fn _test_html_padding(padding: Vec<u8>) {
         let mut rng = weak_rng();
-        let comment_syntax_size = HTML_COMMENT_START_SIZE
-            + HTML_COMMENT_END_SIZE;
+        let comment_syntax_size = HTML_COMMENT_START_SIZE + HTML_COMMENT_END_SIZE;
         let padding = if padding.len() == 0 {
-            let pad_len = Range::new(comment_syntax_size, 50)
-                .ind_sample(&mut rng);
+            let pad_len = Range::new(comment_syntax_size, 50).ind_sample(&mut rng);
             let padding = get_html_padding(pad_len, &mut rng);
             assert_eq!(padding.len(), pad_len);
             padding
@@ -132,16 +127,19 @@ mod tests {
             padding
         };
         // The padding starts with '<!--'.
-        assert_eq!(&padding[..HTML_COMMENT_START_SIZE],
-                   HTML_COMMENT_START.as_bytes());
+        assert_eq!(
+            &padding[..HTML_COMMENT_START_SIZE],
+            HTML_COMMENT_START.as_bytes()
+        );
         // The padding ends with '-->'.
-        assert_eq!(&padding[padding.len() - HTML_COMMENT_END_SIZE..],
-                   HTML_COMMENT_END.as_bytes());
+        assert_eq!(
+            &padding[padding.len() - HTML_COMMENT_END_SIZE..],
+            HTML_COMMENT_END.as_bytes()
+        );
         // Ensure '-->' is not present in the padding.
         let rand_padding = str::from_utf8(
-            &padding[HTML_COMMENT_START_SIZE
-                     ..padding.len() - HTML_COMMENT_END_SIZE])
-            .unwrap();
+            &padding[HTML_COMMENT_START_SIZE..padding.len() - HTML_COMMENT_END_SIZE],
+        ).unwrap();
         assert!(!rand_padding.contains(HTML_COMMENT_END));
     }
 
@@ -155,13 +153,10 @@ mod tests {
     #[test]
     fn test_get_html_padding_too_little() {
         let mut rng = weak_rng();
-        let comment_syntax_size = HTML_COMMENT_START_SIZE
-            + HTML_COMMENT_END_SIZE;
-        let pad_len = Range::new(0, comment_syntax_size)
-            .ind_sample(&mut rng);
+        let comment_syntax_size = HTML_COMMENT_START_SIZE + HTML_COMMENT_END_SIZE;
+        let pad_len = Range::new(0, comment_syntax_size).ind_sample(&mut rng);
         get_html_padding(pad_len, &mut rng);
     }
-
 
     #[test]
     fn test_pad_method_css() {
@@ -177,13 +172,11 @@ mod tests {
         assert_eq!(object.content.len(), raw_len);
         assert!(match object.kind {
             ObjectKind::CSS => true,
-            _               => false,
+            _ => false,
         });
 
-        let comment_syntax_size = CSS_COMMENT_START_SIZE
-            + CSS_COMMENT_END_SIZE;
-        let pad_len = Range::new(comment_syntax_size, 50)
-            .ind_sample(&mut rng);
+        let comment_syntax_size = CSS_COMMENT_START_SIZE + CSS_COMMENT_END_SIZE;
+        let pad_len = Range::new(comment_syntax_size, 50).ind_sample(&mut rng);
         let target_size = raw_len + pad_len;
         object.pad(target_size);
         assert_eq!(object.content.len(), target_size);
@@ -194,11 +187,9 @@ mod tests {
 
     fn _test_css_padding(padding: Vec<u8>) {
         let mut rng = weak_rng();
-        let comment_syntax_size = CSS_COMMENT_START_SIZE
-            + CSS_COMMENT_END_SIZE;
+        let comment_syntax_size = CSS_COMMENT_START_SIZE + CSS_COMMENT_END_SIZE;
         let padding = if padding.len() == 0 {
-            let pad_len = Range::new(comment_syntax_size, 50)
-                .ind_sample(&mut rng);
+            let pad_len = Range::new(comment_syntax_size, 50).ind_sample(&mut rng);
             let padding = get_css_padding(pad_len, &mut rng);
             assert_eq!(padding.len(), pad_len);
             padding
@@ -206,16 +197,19 @@ mod tests {
             padding
         };
         // The padding starts with '/*'.
-        assert_eq!(&padding[..CSS_COMMENT_START_SIZE],
-                   CSS_COMMENT_START.as_bytes());
+        assert_eq!(
+            &padding[..CSS_COMMENT_START_SIZE],
+            CSS_COMMENT_START.as_bytes()
+        );
         // The padding ends with '*/'.
-        assert_eq!(&padding[padding.len() - CSS_COMMENT_END_SIZE..],
-                   CSS_COMMENT_END.as_bytes());
+        assert_eq!(
+            &padding[padding.len() - CSS_COMMENT_END_SIZE..],
+            CSS_COMMENT_END.as_bytes()
+        );
         // Ensure '*/' is not present in the padding.
         let rand_padding = str::from_utf8(
-            &padding[CSS_COMMENT_START_SIZE
-                     ..padding.len() - CSS_COMMENT_END_SIZE])
-            .unwrap();
+            &padding[CSS_COMMENT_START_SIZE..padding.len() - CSS_COMMENT_END_SIZE],
+        ).unwrap();
         assert!(!rand_padding.contains(CSS_COMMENT_END));
     }
 
@@ -229,13 +223,10 @@ mod tests {
     #[test]
     fn test_get_css_padding_too_little() {
         let mut rng = weak_rng();
-        let comment_syntax_size = CSS_COMMENT_START_SIZE
-            + CSS_COMMENT_END_SIZE;
-        let pad_len = Range::new(0, comment_syntax_size)
-            .ind_sample(&mut rng);
+        let comment_syntax_size = CSS_COMMENT_START_SIZE + CSS_COMMENT_END_SIZE;
+        let pad_len = Range::new(0, comment_syntax_size).ind_sample(&mut rng);
         get_css_padding(pad_len, &mut rng);
     }
-
 
     #[test]
     fn test_pad_method_png() {
@@ -251,7 +242,7 @@ mod tests {
         assert_eq!(object.content.len(), raw_len);
         assert!(match object.kind {
             ObjectKind::IMG => true,
-            _               => false,
+            _ => false,
         });
 
         let pad_len = Range::new(0, 50).ind_sample(&mut rng);
