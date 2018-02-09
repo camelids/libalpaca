@@ -1,5 +1,6 @@
 //! Contains padding functions for different resource types.
-use rand::{sample, weak_rng, Rng, XorShiftRng};
+use rand::{weak_rng, Rng};
+use rand::distributions::{IndependentSample, Range};
 use std::iter::Extend;
 
 use objects::*;
@@ -35,21 +36,20 @@ impl Paddable for Object {
     ///
     /// * `target_size` - The target size.
     fn pad(&mut self, target_size: usize) {
-        let mut rng = weak_rng();
         // Rust's type system guarantees pad_len will be >=0 because
         // target_size is unsigned. However, Rust panic!s in this case and in
         // the future we should do proper recovery/ error handling.
         let pad_len = target_size - self.content.len();
         let padding = match self.kind {
-            ObjectKind::HTML => get_html_padding(pad_len, &mut rng),
-            ObjectKind::CSS => get_css_padding(pad_len, &mut rng),
-            _ => get_binary_padding(pad_len, &mut rng),
+            ObjectKind::HTML => get_html_padding(pad_len),
+            ObjectKind::CSS => get_css_padding(pad_len),
+            _ => get_binary_padding(pad_len),
         };
         self.content.extend(padding);
     }
 }
 
-fn get_html_padding(pad_len: usize, rng: &mut XorShiftRng) -> Vec<u8> {
+fn get_html_padding(pad_len: usize) -> Vec<u8> {
     // During HTML morphing we should ensure the target size is at least 7
     // bytes larger than the real HTML to account for the comment opening
     // and closing syntax.
@@ -58,12 +58,12 @@ fn get_html_padding(pad_len: usize, rng: &mut XorShiftRng) -> Vec<u8> {
     // [46,127) contains only human-readable ascii characters, no
     // whitespace, and omits '-' to ensure the HTML comment cannot be ended
     // early by the random generation of the bytes corresponding to '-->'.
-    pad.extend(sample(rng, 46..127, pad_len));
+    add_random_chars_in_range(&mut pad, pad_len, 46, 127);
     pad.extend(Vec::from(HTML_COMMENT_END));
     pad
 }
 
-fn get_css_padding(pad_len: usize, rng: &mut XorShiftRng) -> Vec<u8> {
+fn get_css_padding(pad_len: usize) -> Vec<u8> {
     // During the CSS morphing we should ensure the target size is at least
     // 4 bytes larger than the real CSS.
     let pad_len = pad_len - CSS_COMMENT_START_SIZE - CSS_COMMENT_END_SIZE;
@@ -71,13 +71,22 @@ fn get_css_padding(pad_len: usize, rng: &mut XorShiftRng) -> Vec<u8> {
     // [43,127) contains only human-readable ascii characters, no
     // whitespace, and omits '*' to ensure the CSS comment cannot be ended
     // early by the random generation of the bytes corresponding to '*/'.
-    pad.extend(sample(rng, 43..127, pad_len));
+    add_random_chars_in_range(&mut pad, pad_len, 43, 127);
     pad.extend(Vec::from(CSS_COMMENT_END));
     pad
 }
 
-fn get_binary_padding(pad_len: usize, rng: &mut XorShiftRng) -> Vec<u8> {
-    rng.gen_iter::<u8>().take(pad_len).collect::<Vec<u8>>()
+fn add_random_chars_in_range(pad: &mut Vec<u8>, pad_len: usize, lb: u8, ub: u8) {
+    let acceptable_chars = Range::new(lb, ub);
+    let mut rng = weak_rng();
+    for _ in 0..pad_len {
+        pad.push(acceptable_chars.ind_sample(&mut rng));
+    }
+}
+
+fn get_binary_padding(pad_len: usize) -> Vec<u8> {
+    let mut rng = weak_rng();
+    rng.gen_iter::<u8>().take(pad_len).collect()
 }
 
 #[cfg(test)]
@@ -92,7 +101,8 @@ mod tests {
     fn test_pad_method_html() {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
-        let raw = sample(&mut rng, 46..127, raw_len);
+        let mut raw = Vec::new();
+        add_random_chars_in_range(&mut raw, raw_len, 46, 127);
         let mut object = Object {
             kind: ObjectKind::HTML,
             content: raw.to_vec(),
@@ -120,7 +130,7 @@ mod tests {
         let comment_syntax_size = HTML_COMMENT_START_SIZE + HTML_COMMENT_END_SIZE;
         let padding = if padding.len() == 0 {
             let pad_len = Range::new(comment_syntax_size, 50).ind_sample(&mut rng);
-            let padding = get_html_padding(pad_len, &mut rng);
+            let padding = get_html_padding(pad_len);
             assert_eq!(padding.len(), pad_len);
             padding
         } else {
@@ -145,7 +155,7 @@ mod tests {
 
     #[test]
     fn test_get_html_padding() {
-        let padding: Vec<u8> = Vec::new();
+        let padding = Vec::new();
         _test_html_padding(padding);
     }
 
@@ -155,14 +165,15 @@ mod tests {
         let mut rng = weak_rng();
         let comment_syntax_size = HTML_COMMENT_START_SIZE + HTML_COMMENT_END_SIZE;
         let pad_len = Range::new(0, comment_syntax_size).ind_sample(&mut rng);
-        get_html_padding(pad_len, &mut rng);
+        get_html_padding(pad_len);
     }
 
     #[test]
     fn test_pad_method_css() {
         let mut rng = weak_rng();
         let raw_len = Range::new(0, 50).ind_sample(&mut rng);
-        let raw = sample(&mut rng, 43..127, raw_len);
+        let mut raw = Vec::new();
+        add_random_chars_in_range(&mut raw, raw_len, 43, 127);
         let mut object = Object {
             kind: ObjectKind::CSS,
             content: raw.to_vec(),
@@ -190,7 +201,7 @@ mod tests {
         let comment_syntax_size = CSS_COMMENT_START_SIZE + CSS_COMMENT_END_SIZE;
         let padding = if padding.len() == 0 {
             let pad_len = Range::new(comment_syntax_size, 50).ind_sample(&mut rng);
-            let padding = get_css_padding(pad_len, &mut rng);
+            let padding = get_css_padding(pad_len);
             assert_eq!(padding.len(), pad_len);
             padding
         } else {
@@ -215,7 +226,7 @@ mod tests {
 
     #[test]
     fn test_get_css_padding() {
-        let padding: Vec<u8> = Vec::new();
+        let padding = Vec::new();
         _test_css_padding(padding);
     }
 
@@ -225,7 +236,7 @@ mod tests {
         let mut rng = weak_rng();
         let comment_syntax_size = CSS_COMMENT_START_SIZE + CSS_COMMENT_END_SIZE;
         let pad_len = Range::new(0, comment_syntax_size).ind_sample(&mut rng);
-        get_css_padding(pad_len, &mut rng);
+        get_css_padding(pad_len);
     }
 
     #[test]
@@ -257,7 +268,7 @@ mod tests {
     fn test_get_binary_padding() {
         let mut rng = weak_rng();
         let pad_len = Range::new(0, 50).ind_sample(&mut rng);
-        let padding = get_binary_padding(pad_len, &mut rng);
+        let padding = get_binary_padding(pad_len);
         assert_eq!(padding.len(), pad_len);
     }
 

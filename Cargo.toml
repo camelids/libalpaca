@@ -11,4 +11,4 @@ name = "alpaca"
 crate-type = ["dylib"]
 
 [dependencies]
-rand = "0.3"
+rand = "0.4"
