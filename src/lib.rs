@@ -5,6 +5,8 @@
 #![warn(missing_docs)]
 
 extern crate rand;
+extern crate select;
+extern crate url;
 
 pub mod pad;
 pub mod objects;

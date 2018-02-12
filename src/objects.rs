@@ -1,9 +1,13 @@
 //! Defines object data model used by libalpaca.
+use std::path::PathBuf;
+
+use url::Url;
+
 use parsing::parse_object_kind;
 
 /// Defines our basic object types, each of which has a corresponding
 /// unique (distribution, padding type) tuple.
-#[derive(PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ObjectKind {
     /// Fake "padding" object
     Alpaca,
@@ -17,7 +21,7 @@ pub enum ObjectKind {
     Unknown,
 }
 
-/// An object to be used in the morphing process.
+/// An object we will send as a response after morphing, and associated data.
 pub struct Object {
     /// Type of the Object
     pub kind: ObjectKind,
@@ -26,6 +30,24 @@ pub struct Object {
     /// Position in the HTML body
     pub position: Option<usize>,
     /// Size to pad the Object to
+    pub target_size: Option<usize>,
+}
+
+/// Stores information about resources used for morphing HTML.
+#[derive(Debug, PartialEq)]
+pub struct ObjectReference {
+    /// Alpaca Object type of the resource
+    pub kind: ObjectKind,
+    /// URL of the resource
+    pub url: Url,
+    /// Absolute file path of the resource
+    pub path: PathBuf,
+    /// Node index in the HTML `select::document::Document`
+    /// (`None` if ObjectKind::Alpaca, else `Some(_)`)
+    pub node_index: Option<usize>,
+    /// Size (`None` if ObjectKind::Alpaca, else `Some(_)`)
+    pub size: Option<usize>,
+    /// Target size to be used in HTML morphing ('?...&alpaca=<target_size>')
     pub target_size: Option<usize>,
 }
 

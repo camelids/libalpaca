@@ -8,7 +8,9 @@ authors = [
 
 [lib]
 name = "alpaca"
-crate-type = ["dylib"]
+crate-type = ["rlib", "dylib"]
 
 [dependencies]
-rand = "0.4"
+rand = "0.4.2"
+select = "0.4.2"
+url = "1.6.0"

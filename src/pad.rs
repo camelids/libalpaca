@@ -76,7 +76,8 @@ fn get_css_padding(pad_len: usize) -> Vec<u8> {
     pad
 }
 
-fn add_random_chars_in_range(pad: &mut Vec<u8>, pad_len: usize, lb: u8, ub: u8) {
+/// Extends a Vec<u8> with random values (ASCII characters).
+pub fn add_random_chars_in_range(pad: &mut Vec<u8>, pad_len: usize, lb: u8, ub: u8) {
     let acceptable_chars = Range::new(lb, ub);
     let mut rng = weak_rng();
     for _ in 0..pad_len {

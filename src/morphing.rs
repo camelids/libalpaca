@@ -3,7 +3,7 @@ use rand::{weak_rng, Rng};
 
 use pad::*;
 use objects::*;
-use parsing::{parse_objects, parse_target_size};
+use parsing::{parse_html_object_refs, parse_target_size};
 use distribution::{sample_html_size, sample_object_count, sample_object_sizes};
 
 const PAGE_SAMPLE_LIMIT: u8 = 10;
@@ -14,11 +14,11 @@ const PAGE_SAMPLE_LIMIT: u8 = 10;
 /// references to its objects accordingly, and pads it; if it is a different
 /// type of object, it returns the object padded to the specified size.
 #[no_mangle]
-pub extern "C" fn morph_object(object: &[u8], request: &str) -> *const u8 {
+pub extern "C" fn morph_object(object: &[u8], request: &str, root_path: &str) -> *const u8 {
     let mut object = Object::from(object, request);
 
     let target_size = if object.kind == ObjectKind::HTML {
-        morph_html(&mut object).expect("Failed morphing page")
+        morph_html(&mut object, root_path).expect("Failed morphing page")
     } else {
         parse_target_size(request)
     };
@@ -39,18 +39,18 @@ pub extern "C" fn morph_object(object: &[u8], request: &str) -> *const u8 {
 /// # Arguments
 ///
 /// `html` - HTML page.
-fn morph_html(html: &mut Object) -> Result<usize, ()> {
-    let mut objects = parse_objects(html);
-    objects.sort_unstable_by(|a, b| a.content.len().cmp(&b.content.len()));
+fn morph_html(html: &mut Object, root_path: &str) -> Result<usize, ()> {
+    let mut object_refs = parse_html_object_refs(html, root_path);
+    object_refs.sort_unstable_by(|a, b| a.size.cmp(&b.size));
     // Minimum characteristics.
-    let min_count = objects.len();
+    let min_count = object_refs.len();
 
     let mut rng = weak_rng();
 
     // Try morphing for PAGE_SAMPLE_LIMIT times.
     let mut success = false;
     for _ in 0..PAGE_SAMPLE_LIMIT {
-        if morph_from_distribution(&mut rng, &mut objects, min_count).is_ok() {
+        if morph_from_distribution(&mut rng, &mut object_refs, min_count).is_ok() {
             success = true;
             break;
         }
@@ -60,7 +60,7 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
         return Err(());
     }
 
-    insert_objects_refs(html, &objects)?;
+    insert_object_refs(html, &object_refs)?;
 
     // Return the target HTML page size.
     let html_min_size = html.content.len();
@@ -69,7 +69,7 @@ fn morph_html(html: &mut Object) -> Result<usize, ()> {
 
 fn morph_from_distribution<R: Rng>(
     rng: &mut R,
-    objects: &mut Vec<Object>,
+    object_refs: &mut Vec<ObjectReference>,
     min_count: usize,
 ) -> Result<(), ()> {
     // Sample target number of objects (count) and target sizes for morphed
@@ -77,36 +77,42 @@ fn morph_from_distribution<R: Rng>(
     let target_count = sample_object_count(rng, min_count)?;
     let mut target_sizes = sample_object_sizes(rng, target_count)?;
 
-    // Match target sizes to objects.
+    // Match target sizes to object refs.
     // We will consider each target_size and decide whether to use it to pad
     // an object or to create a new object.
-    // NOTE: We append newly created objects to the array objects.
-    // NOTE: array objects is initially sorted.
+    // NOTE: We append newly created object references to the
+    // Vec<ObjectReference> object_refs.
+    // NOTE: Vec<ObjectReference> object_refs is initially sorted.
     target_sizes.sort();
 
-    let n = objects.len(); // Keep track of initial number of objects.
+    let n = object_refs.len(); // Keep track of initial number of object_refs.
     let mut i = 0; // Pointing at next object to morph.
     for s in target_sizes {
-        if (i < n) && (s >= objects[i].content.len()) {
+        // NOTE: Use of `unwrap()` here should be safe because all
+        // `ObjectReference.size`s returned by `parse_html_object_refs` should
+        // match `Some(_)`. Only when `ObjectKind::Alpaca`s should
+        // `ObjectReference.size` match `None`.
+        if (i < n) && (s >= object_refs[i].size.unwrap()) {
             // Pad i-th object to size s.
-            objects[i].target_size = Some(s);
+            object_refs[i].target_size = Some(s);
             i += 1;
         } else {
             // Create new padding object.
-            let o = Object {
+            let o = ObjectReference {
                 kind: ObjectKind::Alpaca,
-                content: Vec::new(),
-                position: None,
+                path: String::from("?alpaca=") + &s.to_string(),
+                node_index: None,
+                size: None,
                 target_size: Some(s),
             };
-            objects.push(o);
+            object_refs.push(o);
         }
     }
 
     // No proper padding was found for some object.
     if i < n {
         // Need to remove padding objects.
-        objects.truncate(n);
+        object_refs.truncate(n);
 
         return Err(());
     }
@@ -115,7 +121,7 @@ fn morph_from_distribution<R: Rng>(
 }
 
 #[allow(unused)]
-fn insert_objects_refs(html: &mut Object, objects: &[Object]) -> Result<(), ()> {
+fn insert_object_refs(html: &mut Object, object_refs: &[ObjectReference]) -> Result<(), ()> {
     unimplemented!();
 }
 
@@ -124,15 +130,19 @@ mod tests {
     use super::*;
     use rand::{SeedableRng, XorShiftRng};
 
-    fn generate_objects() -> Vec<Object> {
+    fn generate_object_refs() -> Vec<ObjectReference> {
         let object_sizes: Vec<usize> = vec![400, 2000, 1000, 100];
 
         object_sizes
             .iter()
-            .map(|s| Object {
+            .map(|size| ObjectReference {
                 kind: ObjectKind::Unknown,
-                content: vec![0u8; *s],
-                position: None,
+                // TODO: maybe we want actual mock path Strings. However,
+                // that'll probably be more relevant for integration, rather
+                // than unit tests.
+                path: String::new(),
+                node_index: None,
+                size: Some(*size),
                 target_size: None,
             })
             .collect()
@@ -146,12 +156,12 @@ mod tests {
 
     #[test]
     fn test_morph_objects_from_distribution() {
-        let mut objects = generate_objects();
+        let mut object_refs = generate_object_refs();
         let mut rng = init_seeded_rng();
 
-        let min_count = objects.len();
+        let min_count = object_refs.len();
 
-        if let Err(_) = morph_from_distribution(&mut rng, &mut objects, min_count) {
+        if let Err(_) = morph_from_distribution(&mut rng, &mut object_refs, min_count) {
             assert!(false);
         }
 
@@ -159,11 +169,10 @@ mod tests {
             1048, 2167, 3824, 4230, 1131, 1215, 1529, 1897, 4260, 5343, 5373, 8315, 8513, 10687,
             12617, 12807, 13867, 14644, 24146,
         ];
-        let new_sizes = objects
+        let new_sizes = object_refs
             .iter()
             .map(|o| o.target_size.expect("Need Some"))
             .collect::<Vec<_>>();
-        println!("expected sizes: {:?}", new_sizes);
         assert!(new_sizes == expected_sizes);
     }
     // TODO: I migrated the following `test_pad_object_*` tests from the pad
